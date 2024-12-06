@@ -9,6 +9,7 @@
             <select id="formatSelect">
                 <option>APA</option>
                 <option>TJS</option>
+                <option>Chicago</option>
             </select>
             <label class="toggle">
                 <span class="toggle-label">With DOI</span>
@@ -158,6 +159,7 @@
         const RefFormat = Object.freeze({
             Apa: "APA",
             Tjs: "TJS",
+            Chicago: "Chicago",
         });
 
         const Regex = Object.freeze({
@@ -768,6 +770,144 @@
             }
         }
 
+        class ChicagoBuilder extends Builder {
+            rangeDelimiter = Punc.EnDash;
+
+            get authorsPart() {
+                const authors = this.r.authors;
+                const names = [authors[0]].concat(authors.slice(1).map(this.toForeSur));
+
+                return Builder.ensureEnd(
+                    this.formatNames(names, false),
+                    Punc.Period);
+            }
+
+            get yearPart() {
+                return Builder.ensureEnd(
+                    `${this.r.year}${this.r.yearSuffix || ""}`,
+                    Punc.Period);
+            }
+
+            get italicTitlePart() {
+                return Builder.ensureEnd(
+                    this.toItalic(this.r.title),
+                    Punc.Period);
+            }
+
+            get quoteTitlePart() {
+                return Builder.wrapQuote2(Builder.ensureEnd(
+                    this.r.title,
+                    Punc.Period));
+            }
+
+            get articleNumberPart() {
+                if (!this.r.articleNumber)
+                    return "";
+
+                return `${this.r.articleNumber}`;
+            }
+
+            get pageRangePart() {
+                if (!this.r.pageFrom || !this.r.pageTo)
+                    return "";
+
+                return `${this.r.pageFrom}${Punc.EnDash}${this.r.pageTo}`;
+            }
+
+            get editorsPart() {
+                if (!this.r.editors.length)
+                    return "";
+
+                const names = this.r.editors.map(this.toForeSur);
+
+                return `edited by ${this.formatNames(names, true)}`;
+            }
+
+            get publishersPart() {
+                return Builder.ensureEnd(
+                    this.r.publishers[0],
+                    Punc.Period);
+            }
+
+            toJournalArticle() {
+                const iPeriodical = this.toItalic(this.r.periodical);
+                const vol = this.r.volumeNumber ? `${this.r.volumeNumber}` : "";
+                const iss = Builder.wrapParen(this.r.issueNumber);
+                const volIss = [vol, iss].filter(x => x).join(Punc.Space);
+                const range = this.articleNumberPart || this.pageRangePart || "";
+                const volRangePunc = Punc.Colon + (iss ? Punc.Space : "");
+                const volIssRange = [volIss, range].filter(x => x)
+                    .join(volRangePunc);
+                const periodical = [iPeriodical, volIssRange].filter(x => x)
+                    .join(Punc.Space);
+
+                return Builder.joinPartsSpace(
+                    this.authorsPart,
+                    this.yearPart,
+                    this.quoteTitlePart,
+                    Builder.ensureEnd(periodical, Punc.Period),
+                    this.doiHtml);
+            }
+
+            toBook() {
+                const ed = this.r.edition ? `${this.r.edition} ed.` : "";
+                const vol = this.r.volumeNumber ? `Vol. ${this.r.volumeNumber}.` : "";
+
+                return Builder.joinPartsSpace(
+                    this.authorsPart,
+                    this.yearPart,
+                    this.italicTitlePart,
+                    ed,
+                    vol,
+                    this.publishersPart);
+            }
+
+            toChapterInBook() {
+                const iBook = this.toItalic(this.r.sourceTitle);
+                const book = Builder.ensureEnd(`In ${iBook}`, Punc.Comma);
+                const eds = this.editorsPart;
+                const range = this.articleNumberPart || this.pageRangePart || "";
+                const edsRange = [eds, range].filter(x => x).join(Punc.Comma + Punc.Space);
+
+                return Builder.joinPartsSpace(
+                    this.authorsPart,
+                    this.yearPart,
+                    this.quoteTitlePart,
+                    book,
+                    Builder.ensureEnd(edsRange, Punc.Period),
+                    this.publishersPart);
+            }
+
+            /** @param {string[]} names @param {boolean} disableCommaOnTwo */
+            formatNames(names, disableCommaOnTwo = false) {
+                if (names.length === 0)
+                    return "";
+
+                if (names.length === 1)
+                    return names[0];
+
+                const firstName = names[0];
+                const lastIndex = names.length - 1;
+                const lastName = names[lastIndex];
+
+                const punc = Punc.Comma + Punc.Space;
+                const headPart = names.slice(0, lastIndex).join(punc);
+
+                const tailPunc = (disableCommaOnTwo && names.length == 2) ? Punc.Space : punc;
+                const tailPart = `${tailPunc}and ${lastName}`;
+
+                return headPart + tailPart;
+            }
+
+            toForeSur(name = "") {
+                if (!name.includes(","))
+                    return name;
+
+                const [last, first] = name.split(",").map(x => x.trim()).slice(0, 2);
+                return [first, last].join(Punc.Space);
+            }
+        }
+
         /** @type {HTMLInputElement} */
         const $jsonFileInput = document.querySelector("#jsonFileInput");
         /** @type {HTMLSelectElement} */
@@ -827,6 +967,7 @@
             const builder = (new Map([
                 [RefFormat.Apa, ApaBuilder],
                 [RefFormat.Tjs, TjsBuilder],
+                [RefFormat.Chicago, ChicagoBuilder],
             ])).get(format);
             const toFormat = r => toRefElement(new builder(r, true, withDoi));
 
@@ -861,6 +1002,7 @@
             const $p1 = document.createElement("p");
             $p1.append(r.searchKey);
             r.infoUrl.split(" ")
+                .filter(URL.canParse)
                 .map(x => new URL(x))
                 .forEach(url => appendAnchor($p1, url.hostname, url.href));
 
