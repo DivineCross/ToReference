@@ -880,8 +880,6 @@
 
             /** @param {string[]} names @param {boolean} disableCommaOnTwo */
             formatNames(names, disableCommaOnTwo = false) {
-                names = names.map(this.toAbbr);
-
                 if (names.length === 0)
                     return "";
 
@@ -907,17 +905,6 @@
 
                 const [last, first] = name.split(",").map(x => x.trim()).slice(0, 2);
                 return [first, last].join(Punc.Space);
-            }
-
-            toAbbr(name = "") {
-                const isSurFore = name.includes(Punc.Comma);
-                const ps = name.split(Punc.Space).filter(x => x);
-                const sur = isSurFore ? ps.at(0) : ps.at(-1);
-                const fores = isSurFore ? ps.slice(1) : ps.slice(0, ps.length - 1);
-                const abbrs = fores.map(x => x[0].toLowerCase === x[0] ? x : `${x[0]}.`);
-                const allAbbrs = (isSurFore ? [sur].concat(abbrs) : abbrs.concat([sur]));
-
-                return allAbbrs.join(Punc.Space);
             }
         }
 
