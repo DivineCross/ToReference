@@ -878,6 +878,18 @@
                     this.publishersPart);
             }
 
+            toDegree() {
+                const url = this.url ? Builder.ensureEnd(this.url, Punc.Period) : "";
+
+                return Builder.joinPartsSpace(
+                    this.authorsPart,
+                    this.yearPart,
+                    this.quoteTitlePart,
+                    Builder.ensureEnd(this.r.degreeType, Punc.Comma),
+                    Builder.ensureEnd(this.r.university, Punc.Period),
+                    url);
+            }
+
             /** @param {string[]} names @param {boolean} disableCommaOnTwo */
             formatNames(names, disableCommaOnTwo = false) {
                 if (names.length === 0)
