@@ -8,6 +8,7 @@
     const showElements = Helper.Dom.showElements;
     const escapeRegexp = Helper.Regexp.escape;
     const parseJson = Reference.fromJson;
+    const SourceType = Reference.SourceType;
 
     const RefFormat = Object.freeze({
         Apa: "APA",
@@ -15,11 +16,8 @@
         Chicago: "Chicago",
     });
 
-    const Regex = Object.freeze({
-        EndPunc: /[.?!'’"”]$/,
-    });
-
     const Punc = Object.freeze({
+        EndExp: /[.?!'’"”]$/,
         Space: " ",
         EnDash: "–",
         Hyphen: "-",
@@ -118,7 +116,7 @@
                 return $e.textContent;
             })();
 
-            if (punc === Punc.Period && Regex.EndPunc.test(text))
+            if (punc === Punc.Period && Punc.EndExp.test(text))
                 return part;
 
             if (text.endsWith(punc))
@@ -156,15 +154,15 @@
 
         build() {
             const func = (new Map([
-                [Reference.SourceType.JournalArticle, this.toJournalArticle],
-                [Reference.SourceType.Book, this.toBook],
-                [Reference.SourceType.ChapterInBook, this.toChapterInBook],
-                [Reference.SourceType.ConferenceInBook, this.toChapterInBook],
-                [Reference.SourceType.Conference, this.toConference],
-                [Reference.SourceType.Degree, this.toDegree],
-                [Reference.SourceType.Database, this.toDatabase],
-                [Reference.SourceType.Webpage, this.toWebpage],
-                [Reference.SourceType.AsIs, this.toAsIs],
+                [SourceType.JournalArticle, this.toJournalArticle],
+                [SourceType.Book, this.toBook],
+                [SourceType.ChapterInBook, this.toChapterInBook],
+                [SourceType.ConferenceInBook, this.toChapterInBook],
+                [SourceType.Conference, this.toConference],
+                [SourceType.Degree, this.toDegree],
+                [SourceType.Database, this.toDatabase],
+                [SourceType.Webpage, this.toWebpage],
+                [SourceType.AsIs, this.toAsIs],
             ])).get(this.r.sourceType);
 
             if (!func)
@@ -729,16 +727,37 @@
     if (!$jsonFileInput || !$formatSelect || !$withDoiCheck || !$filterInput || !$outputArea)
         throw Error("Elements of the interface are not existed in the document.");
 
-    registerTextFileChange($jsonFileInput, jsonToApa);
+    /** @type {Reference[]} */
+    let references = [];
+    initSelect();
+    registerInput();
 
-    function jsonToApa(json = "") {
-        const references = parseJson(json);
+    function initSelect() {
+        const $options = [...$formatSelect.querySelectorAll('option')];
+        if (!$options.length)
+            return;
 
-        display(references);
-        registerEvents();
+        const format = new URL(window.location.href).searchParams.get("format") || "";
+        const map = new Map($options.map($o => [$o.value.toLowerCase(), $o]));
+        const $option = map.get(format.toLowerCase()) || $options[0];
+        $option.selected = true;
     }
 
-    function registerEvents() {
+    function loadJson(json = "") {
+        references = parseJson(json);
+        refresh();
+    }
+
+    function refresh() {
+        display();
+        registerOutput();
+    }
+
+    function registerInput() {
+        registerTextFileChange($jsonFileInput, loadJson);
+        $jsonFileInput.addEventListener("click", () => $jsonFileInput.value = "");
+        $formatSelect.addEventListener("change", refresh);
+
         $filterInput.addEventListener("input", event => {
             const $divs = document.querySelectorAll("div.ref, div.info");
             const value = escapeRegexp($filterInput.value);
@@ -754,14 +773,15 @@
         $selectAllButton.addEventListener("click", event => {
             copyElement($outputArea, true);
         });
+    }
 
+    function registerOutput() {
         document.querySelectorAll("div.ref").forEach(e => e.addEventListener("click", event => {
             copyElement(e, true);
         }));
     }
 
-    /** @param {Reference[]} references */
-    function display(references) {
+    function display() {
         const withDoi = $withDoiCheck.checked;
         const format = $formatSelect.value;
 
@@ -772,8 +792,10 @@
         ])).get(format);
         const toFormat = r => toRefElement(new builder(r, true, withDoi));
 
+        removeDiv($outputArea);
         references.map(toFormat).forEach(e => $outputArea.appendChild(e));
 
+        removeDiv($refList);
         references.map(toInfoElement).forEach(e => $refList.appendChild(e));
 
         $searchKeyList.innerText = references.map(r => r.searchKey).join("\n");
@@ -818,5 +840,10 @@
         $div.append($p1, $p2);
 
         return $div;
+    }
+
+    /** @param {HTMLElement} e */
+    function removeDiv(e) {
+        [...e.querySelectorAll("div")].forEach($e => $e.remove());
     }
 })();
