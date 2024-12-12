@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+
+<body>
+    <div id="inputArea">
+        <div class="inputRow">
+            <input id="jsonFileInput" type="file" accept="application/json" />
+            Format
+            <select id="formatSelect">
+                <option>APA</option>
+                <option>TJS</option>
+                <option>Chicago</option>
+            </select>
+            <label class="toggle">
+                <span class="toggle-label">With DOI</span>
+                <input id="withDoiCheck" class="toggle-checkbox" type="checkbox">
+                <div class="toggle-switch"></div>
+            </label>
+        </div>
+        <div class="inputRow">
+            過濾 <input id="filterInput" type="text" />
+            <button id="selectAllButton">全部複製</button>
+        </div>
+    </div>
+    <div id="outputArea">
+    </div>
+    <div id="metaArea">
+        <div id="refList" class="metaBlock">
+            <h3>Info</h3>
+        </div>
+        <div class="metaBlock">
+            <h3>SearchKey</h3>
+            <pre id="searchKeyList">
+            </pre>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<style>
+    @font-face {
+        /* https://stackoverflow.com/questions/1366068/whats-the-complete-range-for-chinese-characters-in-unicode */
+        font-family: 'ref-tw';
+        src: local('標楷體');
+        unicode-range: U+4E00-9FFF, U+F900-FAFF, U+3000-303F, U+2F00-2FDF, U+2E80-2EFF;
+    }
+
+    @font-face {
+        font-family: 'ref-en';
+        src: local('Times New Roman');
+    }
+
+    div.inputRow {
+        padding: 12pt;
+        border-bottom: solid black 1pt;
+    }
+
+    div.inputRow>* {
+        height: 20pt;
+    }
+
+    div#outputArea {
+        color: #000000;
+        font-size: 12pt;
+        font-family: 'ref-tw', 'ref-en';
+    }
+
+    div#outputArea>div:hover {
+        cursor: pointer;
+    }
+
+    div.metaBlock {
+        margin-top: 60pt;
+        border-top: solid black 1pt;
+    }
+
+    div.info {
+        padding: 2pt;
+    }
+
+    div.info a {
+        margin-left: 12pt;
+    }
+
+    div.info p {
+        margin: 0pt;
+    }
+</style>
+
+<style>
+    /* https://codepen.io/morgoe/pen/VvzWQg */
+
+    .toggle {
+        cursor: pointer;
+        display: inline-block;
+    }
+
+    .toggle-switch {
+        display: inline-block;
+        background: #ccc;
+        border-radius: 16px;
+        width: 58px;
+        height: 32px;
+        position: relative;
+        vertical-align: middle;
+        transition: background 0.25s;
+    }
+
+    .toggle-switch:before,
+    .toggle-switch:after {
+        content: "";
+    }
+
+    .toggle-switch:before {
+        display: block;
+        background: linear-gradient(to bottom, #fff 0%, #eee 100%);
+        border-radius: 50%;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+        width: 24px;
+        height: 24px;
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        transition: left 0.25s;
+    }
+
+    .toggle:hover .toggle-switch:before {
+        background: linear-gradient(to bottom, #fff 0%, #fff 100%);
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5);
+    }
+
+    .toggle-checkbox:checked+.toggle-switch {
+        background: #56c080;
+    }
+
+    .toggle-checkbox:checked+.toggle-switch:before {
+        left: 30px;
+    }
+
+    .toggle-checkbox {
+        position: absolute;
+        visibility: hidden;
+    }
+
+    .toggle-label {
+        margin-left: 5px;
+        position: relative;
+        top: 2px;
+    }
+</style>
+
+<script type="text/javascript" src="js/helper.js"></script>
+<script type="text/javascript" src="js/reference.js"></script>
+<script type="text/javascript" src="js/to-reference.js"></script>

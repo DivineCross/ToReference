@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+
+<body>
+    <div id="inputArea">
+        <div class="inputRow">
+            json <input id="jsonFileInput" type="file" accept="application/json" />
+        </div>
+    </div>
+    <div id="metaArea">
+        <div class="metaBlock">
+            <h3>Json</h3>
+            <pre id="orderedJson" contenteditable>
+            </pre>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<style>
+    div.inputRow {
+        padding: 12pt;
+        border-bottom: solid black 1pt;
+    }
+
+    div.inputRow>* {
+        height: 20pt;
+    }
+
+    div.metaBlock {
+        margin-top: 24pt;
+    }
+</style>
+
+<script type="text/javascript" src="js/helper.js"></script>
+<script type="text/javascript" src="js/reference.js"></script>
+<script type="text/javascript" src="js/order-ref-json.js"></script>

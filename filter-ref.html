@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+
+<body>
+    <div id="inputArea">
+        <div class="inputRow">
+            <input id="jsonFileInput" type="file" accept="text/plain" />
+        </div>
+        <div class="inputRow">
+            <span>過濾</span>
+            <input id="filterInput" type="text" />
+        </div>
+    </div>
+    <div id="outputArea">
+    </div>
+</body>
+
+</html>
+
+<style>
+    div.inputRow {
+        padding: 12pt;
+        border-bottom: solid black 1pt;
+    }
+
+    div.inputRow>* {
+        height: 20pt;
+    }
+
+    div#outputArea {
+        color: #000000;
+        font-size: 12pt;
+        font-family: consolas;
+    }
+
+    div#outputArea>:hover {
+        cursor: pointer;
+    }
+
+    h4 {
+        font-weight: lighter;
+        color: lightgray;
+    }
+</style>
+
+<script type="text/javascript" src="js/helper.js"></script>
+<script type="text/javascript" src="js/filter-ref.js"></script>
