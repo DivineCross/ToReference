@@ -1,6 +1,7 @@
-((global, factory) => {
-    global.Helper = factory();
-})(typeof window === typeof undefined ? this : window, () => {
+class Helper {
+}
+
+Helper.Alphabetical = (() => {
     class Alphabetical {
     }
 
@@ -94,6 +95,10 @@
         return a.length - b.length;
     };
 
+    return Alphabetical;
+})();
+
+Helper.Dom = (() => {
     class Dom {
     }
 
@@ -135,11 +140,39 @@
             selection.removeAllRanges();
     }
 
-    class Helper {
+    /**
+     * @param {HTMLElement[]} es
+     * @param {boolean} test
+     */
+    Dom.toggleElements = (es, test) => {
+        return test ? Dom.showElements(es) : Dom.hideElements(es);
+    };
+
+    /** @param {HTMLElement[]} es */
+    Dom.showElements = es => {
+        es.forEach(e => e.style.display = "block");
+    };
+
+    /** @param {HTMLElement[]} es */
+    Dom.hideElements = es => {
+        es.forEach(e => e.style.display = "none");
+    };
+
+    return Dom;
+})();
+
+Helper.Regexp = (() => {
+    class Regexp {
     }
 
-    Helper.Alphabetical = Alphabetical;
-    Helper.Dom = Dom;
+    const Regex = Object.freeze({
+        Escape: /[.*+?^${}()|[\]\\]/g,
+        EscapeTo: "\\$&",
+    });
 
-    return Helper;
-});
+    Regexp.escape = (s = "") => {
+        return s.replace(Regex.Escape, Regex.EscapeTo);
+    }
+
+    return Regexp;
+})();
