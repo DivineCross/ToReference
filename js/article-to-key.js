@@ -37,11 +37,13 @@
             .replace(/,\s*(\d{4}[a-z]?)$/gm, "（$1）")
             .split("\n"));
 
-        const regexpC = /(（[一-鿿]+，\d{4}）)|([一-鿿]{2,3}（\d{4}）)/g;
+        const regexpC = /（([一-鿿]、?)+，\d{4}）|((([一-鿿]{2,3})|([a-zA-ZÀ-῿][a-zA-ZÀ-῿&,\.\s]*))(等人)?（\d{4}）)/g;
         const matchesC = inText.match(regexpC);
 
         const citationsC = matchesC.map(m => {
-            const name = m.match(/[一-鿿]+/)[0];
+            const isEtAl = /等人（\d{4}）/.test(m);
+            const etAl = isEtAl ? " et al." : "";
+            const name = m.match(/([一-鿿、]+)|([a-zA-ZÀ-῿][a-zA-ZÀ-῿&,\.\s]*)/)[0] + etAl;
             const year = m.match(/\d{4}/)[0];
             return `${name}（${year}）`;
         });

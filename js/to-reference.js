@@ -153,6 +153,9 @@
         }
 
         build() {
+            const hasAsIs = this.r.asIsParts.length > 0;
+            const type = hasAsIs ? SourceType.AsIs : this.r.sourceType;
+
             const func = (new Map([
                 [SourceType.JournalArticle, this.toJournalArticle],
                 [SourceType.Book, this.toBook],
@@ -163,7 +166,7 @@
                 [SourceType.Database, this.toDatabase],
                 [SourceType.Webpage, this.toWebpage],
                 [SourceType.AsIs, this.toAsIs],
-            ])).get(this.r.sourceType);
+            ])).get(type);
 
             if (!func)
                 throw new Error("Given sourceType is invalid");
